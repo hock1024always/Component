@@ -1,0 +1,15 @@
+package models
+
+import "gorm.io/gorm"
+
+type UserBasic struct {
+	gorm.Model
+	Username string `gorm:"column:username;type:varchar(100);uniqueIndex;not null" json:"username"`
+	Password string `gorm:"column:password;type:varchar(36);not null" json:"password"`
+	//使用webrtc的sdp信息
+	Sdp string `gorm:"column:sdp;type:text;not null" json:"sdp"`
+}
+
+func (table *UserBasic) TableName() string {
+	return "user_basic"
+}

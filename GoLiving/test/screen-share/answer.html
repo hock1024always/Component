@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Screen Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .video-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .status-badge {
+            display: none;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body class="container py-4">
+    <h2 class="mb-4 text-center">屏幕共享 - 接收端</h2>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">连接信息</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="offer" class="form-label">OFFER:</label>
+                        <textarea id="offer" class="form-control" rows="3" onchange="createAnswer()"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="offer_candidate" class="form-label">OFFER CANDIDATE:</label>
+                        <textarea id="offer_candidate" class="form-control" rows="3" onchange="setOfferCandidate()"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="video-container">
+                <h5 class="mb-3">本地共享画面
+                    <span id="localStatus" class="badge bg-success status-badge">已连接</span>
+                </h5>
+                <video id="localVideo" class="w-100" autoplay></video>
+            </div>
+            
+            <div class="video-container">
+                <h5 class="mb-3">远程共享画面
+                    <span id="remoteStatus" class="badge bg-secondary status-badge">等待连接</span>
+                </h5>
+                <video id="remoteVideo" class="w-100" autoplay></video>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 1. 创建 PC
+    // 2. 获取流
+    // 3. 流添加到PC，创建 answer
+    // 4. 异步监听 stream
+
+    let pc = new RTCPeerConnection(null);
+
+    // 远程流
+    pc.onaddstream =  e => {
+        document.getElementById('remoteVideo').srcObject = e.stream;
+    };
+
+    // 候选者
+    pc.onicecandidate = e => {
+        if (e.candidate) {
+            console.log('answer candidate', JSON.stringify(e.candidate));
+        }
+    };
+
+    function createAnswer() {
+        navigator.mediaDevices.getDisplayMedia().then(stream => {
+            document.getElementById('localVideo').srcObject = stream;
+
+            stream.getTracks().forEach(track => {
+                pc.addTrack(track, stream);
+            });
+
+            let offer = JSON.parse(document.getElementById('offer').value);
+            pc.setRemoteDescription({'type': 'offer', 'sdp': offer});
+            pc.createAnswer().then(answer => {
+                console.log('answer', JSON.stringify(answer.sdp));
+                pc.setLocalDescription(answer);
+            });
+        })
+    }
+
+    function setOfferCandidate() {
+        let offerCandidate = JSON.parse(document.getElementById('offer_candidate').value);
+        pc.addIceCandidate(offerCandidate);
+    }
+</script>
+
+</body>
+</html>
