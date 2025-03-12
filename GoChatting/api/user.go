@@ -1,7 +1,7 @@
 package api
 
 import (
-	"chat/service"
+	"GoChatting/service"
 	"github.com/gin-gonic/gin"
 	logging "github.com/sirupsen/logrus"
 )

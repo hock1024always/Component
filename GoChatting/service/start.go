@@ -1,8 +1,8 @@
 package service
 
 import (
-	"chat/conf"
-	"chat/pkg/e"
+	"GoChatting/conf"
+	"GoChatting/pkg/e"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"

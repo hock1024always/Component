@@ -32,8 +32,6 @@ func Register(c *gin.Context) {
 
 	// 发送验证码
 	err := services.SendMail(user.Email, "您的验证码", fmt.Sprintf("您的验证码是：%s，有效期5分钟。", code))
-	fmt.Println(err)
-	fmt.Println(code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "验证码发送失败"})
 		return

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"chat/cache"
-	"chat/conf"
-	"chat/pkg/e"
+	"GoChatting/cache"
+	"GoChatting/conf"
+	"GoChatting/pkg/e"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -31,26 +31,26 @@ type ReplyMsg struct {
 
 // 用户类
 type Client struct {
-	ID 		string
-	SendID 	string
-	Socket  *websocket.Conn
-	Send chan []byte
+	ID     string
+	SendID string
+	Socket *websocket.Conn
+	Send   chan []byte
 }
 
 // 广播类，包括广播内容和源用户
 type Broadcast struct {
-	Client 	*Client
+	Client  *Client
 	Message []byte
-	Type 	int
+	Type    int
 }
 
 // 用户管理
 type ClientManager struct {
-	Clients 	map[string]*Client
-	Broadcast 	chan *Broadcast
-	Reply 		chan *Client
-	Register 	chan *Client
-	Unregister  chan *Client
+	Clients    map[string]*Client
+	Broadcast  chan *Broadcast
+	Reply      chan *Client
+	Register   chan *Client
+	Unregister chan *Client
 }
 
 // Message 信息转JSON (包括：发送者、接收者、内容)
@@ -60,7 +60,7 @@ type Message struct {
 	Content   string `json:"content,omitempty"`
 }
 
-var Manager  = ClientManager{
+var Manager = ClientManager{
 	Clients:    make(map[string]*Client), // 参与连接的用户，出于性能的考虑，需要设置最大连接数
 	Broadcast:  make(chan *Broadcast),
 	Register:   make(chan *Client),
@@ -69,12 +69,12 @@ var Manager  = ClientManager{
 }
 
 func createId(uid, toUid string) string {
-	return uid +"->"+toUid
+	return uid + "->" + toUid
 }
 
 func WsHandler(c *gin.Context) {
-	uid := c.Query("uid")                     // 自己的id
-	toUid := c.Query("toUid")                 // 对方的id
+	uid := c.Query("uid")     // 自己的id
+	toUid := c.Query("toUid") // 对方的id
 	conn, err := (&websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { // CheckOrigin解决跨域问题
 			return true

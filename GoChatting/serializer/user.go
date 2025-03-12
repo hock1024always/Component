@@ -1,6 +1,6 @@
 package serializer
 
-import "chat/model"
+import "GoChatting/model"
 
 type User struct {
 	ID       uint   `json:"id"`
@@ -13,7 +13,7 @@ type User struct {
 	CreateAt int64  `json:"create_at"`
 }
 
-//BuildUser 序列化用户
+// BuildUser 序列化用户
 func BuildUser(user model.User) User {
 	return User{
 		ID:       user.ID,

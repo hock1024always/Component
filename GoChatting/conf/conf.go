@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"chat/model"
+	"GoChatting/model"
 	"context"
 	"fmt"
 	logging "github.com/sirupsen/logrus" //github.com/sirupsen/logrus
@@ -11,23 +11,21 @@ import (
 	"strings"
 )
 
-
 var (
-	MongoDBClient 		*mongo.Client
-	AppMode  			string
-	HttpPort 			string
-	Db         			string
-	DbHost     			string
-	DbPort     			string
-	DbUser     			string
-	DbPassWord 			string
-	DbName     			string
+	MongoDBClient *mongo.Client
+	AppMode       string
+	HttpPort      string
+	Db            string
+	DbHost        string
+	DbPort        string
+	DbUser        string
+	DbPassWord    string
+	DbName        string
 
-	MongoDBName    		string
-	MongoDBAddr  		string
-	MongoDBPwd    		string
-	MongoDBPort    		string
-
+	MongoDBName string
+	MongoDBAddr string
+	MongoDBPwd  string
+	MongoDBPort string
 )
 
 func Init() {
@@ -50,9 +48,9 @@ func Init() {
 	MongoDB()
 }
 
-func MongoDB()  {
+func MongoDB() {
 	// 设置mongoDB客户端连接信息
-	clientOptions := options.Client().ApplyURI("mongodb://"+MongoDBAddr+":"+MongoDBPort)
+	clientOptions := options.Client().ApplyURI("mongodb://" + MongoDBAddr + ":" + MongoDBPort)
 	var err error
 	MongoDBClient, err = mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
