@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<h1>Chat</h1>
+<div id="messages"></div>
+<form id="messageForm">
+    <input type="text" id="messageContent" placeholder="Type a message" required>
+    <button type="submit">Send</button>
+</form>
+
+<script>
+    async function fetchMessages() {
+        const response = await fetch('/messages/1'); // 假设接收者ID为1
+        const messages = await response.json();
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = '';
+        messages.forEach(msg => {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${msg.senderID}: ${msg.content}`;
+            messagesDiv.appendChild(messageElement);
+        });
+    }
+
+    document.getElementById('messageForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = document.getElementById('messageContent').value;
+        const response = await fetch('/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                senderID: 1, // 假设发送者ID为1
+                receiverID: 1,
+                content: content
+            })
+        });
+
+        if (response.ok) {
+            document.getElementById('messageContent').value = '';
+            fetchMessages();
+        } else {
+            alert('Failed to send message');
+        }
+    });
+
+    fetchMessages();
+</script>
+</body>
+</html>
