@@ -10,7 +10,7 @@ import (
 
 type Controller struct{}
 
-func (u Controller) Register(c *gin.Context) {
+func(u Controller) Register(c *gin.Context) {
 	//接受用户名 密码以及确认密码
 	username := c.DefaultPostForm("admin_name", "")
 	password := c.DefaultPostForm("password", "")
