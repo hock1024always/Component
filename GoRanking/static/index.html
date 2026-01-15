@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>实时排行榜</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .leaderboard { margin: 20px 0; }
+        .player { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+        .rank { font-weight: bold; color: #ff6600; width: 50px; }
+        .score { color: #666; font-weight: bold; }
+        #updateForm { margin: 20px 0; padding: 20px; background: #f5f5f5; border-radius: 8px; }
+        input { margin: 5px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #45a049; }
+        #message { margin-top: 10px; padding: 10px; border-radius: 4px; display: none; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6c3; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+<h1>🏆 实时排行榜</h1>
+
+<div id="updateForm">
+    <h3>更新分数</h3>
+    <input id="userId" placeholder="用户ID" value="user1">
+    <input id="username" placeholder="用户名" value="Alice">
+    <input id="score" type="number" placeholder="分数" value="1000">
+    <button onclick="updateScore()">更新</button>
+    <div id="message"></div>
+</div>
+
+<div id="leaderboard" class="leaderboard">
+    <h2>Top 10 排行榜</h2>
+    <div id="players"></div>
+</div>
+
+<script>
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+    let ws;
+
+    function connectWebSocket() {
+        ws = new WebSocket(wsUrl);
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            updateLeaderboard(data.top10);
+        };
+        ws.onclose = function() {
+            setTimeout(connectWebSocket, 3000);
+        };
+    }
+
+    connectWebSocket();
+
+    function updateLeaderboard(players) {
+        const container = document.getElementById('players');
+        container.innerHTML = '';
+
+        if (!players || players.length === 0) {
+            container.innerHTML = '<p>暂无排行数据</p>';
+            return;
+        }
+
+        players.forEach(player => {
+            const div = document.createElement('div');
+            div.className = 'player';
+            div.innerHTML = `
+                <span class="rank">#${player.rank}</span>
+                <span>${player.username}</span>
+                <span class="score">${player.score} 分</span>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function updateScore() {
+        const data = {
+            user_id: document.getElementById('userId').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            score: parseInt(document.getElementById('score').value)
+        };
+
+        try {
+            const response = await fetch('/api/update-score', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            showMessage(result.success ? `分数更新成功！排名: ${result.rank}` : '更新失败', result.success ? 'success' : 'error');
+        } catch (error) {
+            showMessage('更新失败: ' + error.message, 'error');
+        }
+    }
+
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = message;
+        messageDiv.className = type;
+        messageDiv.style.display = 'block';
+        setTimeout(() => messageDiv.style.display = 'none', 3000);
+    }
+
+    window.onload = function() {
+        fetch('/api/top').then(r => r.json()).then(data => updateLeaderboard(data));
+    };
+</script>
+</body>
+</html>
